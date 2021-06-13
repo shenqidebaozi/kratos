@@ -9,8 +9,17 @@ import (
 	_ "github.com/go-kratos/kratos/v2/encoding/proto"
 	_ "github.com/go-kratos/kratos/v2/encoding/xml"
 	_ "github.com/go-kratos/kratos/v2/encoding/yaml"
-	"github.com/go-kratos/kratos/v2/metadata"
 )
+
+// Metadata is the storage medium used by a Transporter.
+type Metadata interface {
+	// Get returns the value associated with the passed key.
+	Get(key string) string
+	// Set stores the key-value pair.
+	Set(key string, value string)
+	// Keys lists the keys stored in this carrier.
+	Keys() []string
+}
 
 // Server is transport server.
 type Server interface {
@@ -31,10 +40,8 @@ type Transporter interface {
 	Operation() string
 	SetOperation(string)
 
-	Metadata() metadata.Metadata
-	// WithMetadata merge new metadata into transport,
-	// it will override old metadata key value if key exists
-	WithMetadata(metadata.Metadata)
+	// metadata must not be nil
+	Metadata() Metadata
 }
 
 type serverTransportKey struct{}

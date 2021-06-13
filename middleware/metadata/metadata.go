@@ -9,17 +9,6 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
-type clientMetadataKey struct{}
-
-func NewClientContext(ctx context.Context, md metadata.Metadata) context.Context {
-	return context.WithValue(ctx, clientMetadataKey{}, md)
-}
-
-func FromClientContext(ctx context.Context) (metadata.Metadata, bool) {
-	md, ok := ctx.Value(clientMetadataKey{}).(metadata.Metadata)
-	return md, ok
-}
-
 // Option is metadata option.
 type Option func(*options)
 
@@ -45,7 +34,7 @@ func WithGlobalPropagation(prefix string) Option {
 // Client is middleware client-side metadata.
 func Client(opts ...Option) middleware.Middleware {
 	options := options{
-		prefix: "x-md-global-",
+		prefix: "x-md-g-",
 	}
 	for _, o := range opts {
 		o(&options)
@@ -70,6 +59,22 @@ func Client(opts ...Option) middleware.Middleware {
 			if tr, ok := transport.FromClientContext(ctx); ok {
 				tr.WithMetadata(md)
 			}
+			return handler(ctx, req)
+		}
+	}
+}
+
+// Server is middleware server-side metadata.
+func Server(opts ...Option) middleware.Middleware {
+	return func(handler middleware.Handler) middleware.Handler {
+		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+			// passing through the global propagated metadata
+			if tr, ok := transport.FromServerContext(ctx); ok {
+				for k, v := range tr.Metadata() {
+
+				}
+			}
+
 			return handler(ctx, req)
 		}
 	}

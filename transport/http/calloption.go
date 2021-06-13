@@ -15,9 +15,11 @@ type CallOption interface {
 }
 
 type callInfo struct {
-	contentType string
-	operation   string
-	metatada    metadata.Metadata
+	contentType       string
+	operation         string
+	metatada          metadata.Metadata
+	mdKeyPrefix       string
+	mdGlobalKeyPrefix string
 }
 
 // EmptyCallOption does not alter the Call configuration.

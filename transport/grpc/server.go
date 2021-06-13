@@ -11,7 +11,6 @@ import (
 	ic "github.com/go-kratos/kratos/v2/internal/context"
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 
@@ -178,10 +177,14 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		ctx, cancel := ic.Merge(ctx, s.ctx)
 		defer cancel()
 		md, _ := grpcmd.FromIncomingContext(ctx)
+		if md == nil {
+			md = grpcmd.New(nil)
+			ctx = grpcmd.NewIncomingContext(ctx, md)
+		}
 		ctx = transport.NewServerContext(ctx, &Transport{
 			endpoint:  s.endpoint.String(),
 			operation: info.FullMethod,
-			metadata:  metadata.New(md),
+			metadata:  MetadataCarrier(md),
 		})
 		if s.timeout > 0 {
 			var cancel context.CancelFunc

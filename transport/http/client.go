@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/encoding"
@@ -202,7 +203,7 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 	}
 	ctx = transport.NewClientContext(ctx, &Transport{
 		endpoint:  client.opts.endpoint,
-		metadata:  c.metatada,
+		metadata:  HeaderCarrier(req.Header),
 		path:      path,
 		method:    method,
 		operation: c.operation,
@@ -230,9 +231,17 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 			req.URL.Scheme = scheme
 			req.URL.Host = addr
 		}
-		if tr, ok := transport.FromClientContext(ctx); ok {
-			for _, key := range tr.Metadata().Keys() {
-				req.Header.Set(key, tr.Metadata().Get(key))
+		// append global metadata keys
+		if tr, ok := transport.FromServerContext(ctx); ok {
+			for _, k := range tr.Metadata().Keys() {
+				if strings.HasPrefix(k, c.mdGlobalKeyPrefix) {
+					req.Header.Set(k, tr.Metadata().Get(k))
+				}
+			}
+		}
+		if md, ok := metadata.FromClientContext(ctx); ok {
+			for k, v := range md {
+				req.Header.Set(c.mdKeyPrefix+k, v)
 			}
 		}
 		res, err := client.do(ctx, req, c)

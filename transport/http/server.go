@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 	"time"
 
@@ -91,21 +92,22 @@ func ErrorEncoder(en EncodeErrorFunc) ServerOption {
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
-	ctx      context.Context
-	lis      net.Listener
-	once     sync.Once
-	endpoint *url.URL
-	err      error
-	network  string
-	address  string
-	timeout  time.Duration
-	filters  []FilterFunc
-	ms       []middleware.Middleware
-	dec      DecodeRequestFunc
-	enc      EncodeResponseFunc
-	ene      EncodeErrorFunc
-	router   *mux.Router
-	log      *log.Helper
+	ctx         context.Context
+	lis         net.Listener
+	once        sync.Once
+	endpoint    *url.URL
+	err         error
+	network     string
+	address     string
+	timeout     time.Duration
+	filters     []FilterFunc
+	ms          []middleware.Middleware
+	dec         DecodeRequestFunc
+	enc         EncodeResponseFunc
+	ene         EncodeErrorFunc
+	router      *mux.Router
+	log         *log.Helper
+	mdKeyPrefix string
 }
 
 // NewServer creates an HTTP server by options.
@@ -168,7 +170,7 @@ func (s *Server) filter() mux.MiddlewareFunc {
 				path:      req.RequestURI,
 				method:    req.Method,
 				operation: req.RequestURI,
-				metadata:  metadata.New(req.Header),
+				metadata:  HeaderCarrier(req.Header),
 			}
 			if r := mux.CurrentRoute(req); r != nil {
 				if path, err := r.GetPathTemplate(); err == nil {
@@ -176,6 +178,13 @@ func (s *Server) filter() mux.MiddlewareFunc {
 				}
 			}
 			ctx = transport.NewServerContext(ctx, tr)
+			md := metadata.New()
+			for k, v := range req.Header {
+				if strings.HasPrefix(k, s.mdKeyPrefix) && len(v) > 0 {
+					md[strings.TrimLeft(k, s.mdKeyPrefix)] = v[0]
+				}
+			}
+			ctx = metadata.NewServerContext(ctx, md)
 			next.ServeHTTP(w, req.WithContext(ctx))
 		})
 	}

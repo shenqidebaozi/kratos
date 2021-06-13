@@ -2,13 +2,14 @@ package http
 
 import (
 	"context"
+	"net/http"
 
-	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
 var (
 	_ transport.Transporter = &Transport{}
+	_ transport.Metadata    = HeaderCarrier{}
 )
 
 // Transport is an HTTP transport.
@@ -17,7 +18,7 @@ type Transport struct {
 	path      string
 	method    string
 	operation string
-	metadata  metadata.Metadata
+	metadata  HeaderCarrier
 }
 
 // Kind returns the transport kind.
@@ -41,15 +42,8 @@ func (tr *Transport) SetOperation(operation string) {
 }
 
 // Metadata returns the transport metadata.
-func (tr *Transport) Metadata() metadata.Metadata {
+func (tr *Transport) Metadata() transport.Metadata {
 	return tr.metadata
-}
-
-// WithMetadata with a metadata into transport md.
-func (tr *Transport) WithMetadata(md metadata.Metadata) {
-	for k, v := range md {
-		tr.metadata.Set(k, v)
-	}
 }
 
 // Path returns the Transport path from server context.
@@ -70,4 +64,25 @@ func Method(ctx context.Context) string {
 		}
 	}
 	return ""
+}
+
+type HeaderCarrier http.Header
+
+// Get returns the value associated with the passed key.
+func (hc HeaderCarrier) Get(key string) string {
+	return http.Header(hc).Get(key)
+}
+
+// Set stores the key-value pair.
+func (hc HeaderCarrier) Set(key string, value string) {
+	http.Header(hc).Set(key, value)
+}
+
+// Keys lists the keys stored in this carrier.
+func (hc HeaderCarrier) Keys() []string {
+	keys := make([]string, 0, len(hc))
+	for k := range http.Header(hc) {
+		keys = append(keys, k)
+	}
+	return keys
 }

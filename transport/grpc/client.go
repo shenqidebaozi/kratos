@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -114,10 +113,15 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 
 func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration) grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+		md, _ := grpcmd.FromOutgoingContext(ctx)
+		if md == nil {
+			md = grpcmd.New(nil)
+			ctx = grpcmd.NewOutgoingContext(ctx, md)
+		}
 		ctx = transport.NewClientContext(ctx, &Transport{
 			endpoint:  cc.Target(),
 			operation: method,
-			metadata:  metadata.Metadata{},
+			metadata:  MetadataCarrier(md),
 		})
 		if timeout > 0 {
 			var cancel context.CancelFunc
@@ -125,9 +129,6 @@ func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration) g
 			defer cancel()
 		}
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
-			if tr, ok := transport.FromClientContext(ctx); ok {
-				ctx = grpcmd.AppendToOutgoingContext(ctx, tr.Metadata().Pairs()...)
-			}
 			return reply, invoker(ctx, method, req, reply, cc, opts...)
 		}
 		if len(ms) > 0 {
