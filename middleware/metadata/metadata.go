@@ -13,8 +13,8 @@ import (
 type Option func(*options)
 
 type options struct {
-	prefix string
-	md     metadata.Metadata
+	globalPrefix []string
+	md           metadata.Metadata
 }
 
 // WithConstants is option with constant metadata key value.
@@ -24,17 +24,17 @@ func WithConstants(md metadata.Metadata) Option {
 	}
 }
 
-// WithGlobalPropagation is option with global propagated key prefix.
-func WithGlobalPropagation(prefix string) Option {
+// WithGlobalPropagatedPrefix is option with global propagated key prefix.
+func WithGlobalPropagatedPrefix(prefix ...string) Option {
 	return func(o *options) {
-		o.prefix = prefix
+		o.globalPrefix = append(o.globalPrefix, prefix...)
 	}
 }
 
 // Client is middleware client-side metadata.
 func Client(opts ...Option) middleware.Middleware {
 	options := options{
-		prefix: "x-md-g-",
+		globalPrefix: []string{"x-md-g-"},
 	}
 	for _, o := range opts {
 		o(&options)
@@ -66,15 +66,23 @@ func Client(opts ...Option) middleware.Middleware {
 
 // Server is middleware server-side metadata.
 func Server(opts ...Option) middleware.Middleware {
+	options := options{
+		globalPrefix: []string{"x-md-g-"},
+	}
+	for _, o := range opts {
+		o(&options)
+	}
+
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			// passing through the global propagated metadata
 			if tr, ok := transport.FromServerContext(ctx); ok {
-				for k, v := range tr.Metadata() {
-
+				md := metadata.New()
+				for _, k := range tr.Metadata().Keys() {
+					md[k] = tr.Metadata().Get(k)
 				}
+				ctx = metadata.NewServerContext(ctx, md)
 			}
-
 			return handler(ctx, req)
 		}
 	}

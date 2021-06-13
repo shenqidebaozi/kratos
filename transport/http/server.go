@@ -6,14 +6,12 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"strings"
 	"sync"
 	"time"
 
 	ic "github.com/go-kratos/kratos/v2/internal/context"
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 
@@ -178,13 +176,7 @@ func (s *Server) filter() mux.MiddlewareFunc {
 				}
 			}
 			ctx = transport.NewServerContext(ctx, tr)
-			md := metadata.New()
-			for k, v := range req.Header {
-				if strings.HasPrefix(k, s.mdKeyPrefix) && len(v) > 0 {
-					md[strings.TrimLeft(k, s.mdKeyPrefix)] = v[0]
-				}
-			}
-			ctx = metadata.NewServerContext(ctx, md)
+
 			next.ServeHTTP(w, req.WithContext(ctx))
 		})
 	}
