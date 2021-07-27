@@ -48,14 +48,16 @@ jobs:
 #         go test ./...
     - name: Examples
       run: |
-        cd examples
-        go build ./...
-        cd registry/etcd/server
+        cd examples/registry/etcd/server
         go build -o main
         ./main &
-        cd ..
-        cd client
-        go run .
+      #  go build ./...
+     #  cd registry/etcd/server
+    #    go build -o main
+   #     main &
+  #      cd ..
+ #       cd client
+ #       go run .
  #       go test ./...
   lint:
     name: lint
