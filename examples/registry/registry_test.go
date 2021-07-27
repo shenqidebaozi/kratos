@@ -89,22 +89,22 @@ func callHTTP(t *testing.T, r registry.Discovery) {
 	t.Logf("[http] SayHello %+v\n", reply)
 }
 
-//func TestETCD(t *testing.T) {
-//	client, err := etcd.New(etcd.Config{
-//		Endpoints: []string{"127.0.0.1:2379"},
-//	})
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//	r := etcdregistry.New(client)
-//	srv, err := startServer(r)
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//	callHTTP(t, r)
-//	callGRPC(t, r)
-//	srv.Stop()
-//}
+func TestETCD(t *testing.T) {
+	client, err := etcd.New(etcd.Config{
+		Endpoints: []string{"127.0.0.1:2379"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := etcdregistry.New(client)
+	srv, err := startServer(r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	callHTTP(t, r)
+	callGRPC(t, r)
+	srv.Stop()
+}
 
 func TestConsul(t *testing.T) {
 	client, err := consul.NewClient(api.DefaultConfig())
