@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/url"
 	"os"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
@@ -26,7 +27,7 @@ type options struct {
 
 	logger    log.Logger
 	registrar registry.Registrar
-
+	registrarTimeout time.Duration
 	servers []transport.Server
 }
 
@@ -78,4 +79,9 @@ func Signal(sigs ...os.Signal) Option {
 // Registrar with service registry.
 func Registrar(r registry.Registrar) Option {
 	return func(o *options) { o.registrar = r }
+}
+
+// Registrar with service registry.
+func RegistrarTimeout(t time.Duration) Option {
+	return func(o *options) { o.registrarTimeout = t }
 }
