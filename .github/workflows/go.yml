@@ -49,6 +49,11 @@ jobs:
         cd examples
         go build ./...
         go test ./...
+        cd registry/etcd/server
+        go run .
+        cd ..
+        cd client
+        go run .
 
   lint:
     name: lint
