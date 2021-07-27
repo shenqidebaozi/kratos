@@ -14,11 +14,11 @@ jobs:
       etcd:
         image: quay.io/coreos/etcd:latest
         ports:
-          - 2379
+          - 2379:2379
       consul:
         image: consul:latest
         ports:
-          - 8500
+          - 8500:8500
 
     steps:
     - uses: actions/checkout@v2
