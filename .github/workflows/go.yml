@@ -52,7 +52,9 @@ jobs:
         go build -o main
         ./main &
         cd ../client
-        go run .
+        pwd
+        go build -o client
+        ./client
       #  go build ./...
      #  cd registry/etcd/server
     #    go build -o main
