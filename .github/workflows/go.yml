@@ -15,7 +15,7 @@ jobs:
       etcd:
         image: quay.io/coreos/etcd:latest
         ports:
-          - 2379:2379
+          - 2379
     steps:
     - uses: actions/checkout@v2
 
