@@ -51,6 +51,8 @@ jobs:
         cd examples/registry/etcd/server
         go build -o main
         ./main &
+        cd ../client
+        go run .
       #  go build ./...
      #  cd registry/etcd/server
     #    go build -o main
