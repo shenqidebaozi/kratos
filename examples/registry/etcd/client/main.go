@@ -47,14 +47,17 @@ func callHTTP(r *registry.Registry) {
 		context.Background(),
 		http.WithEndpoint("discovery:///helloworld"),
 		http.WithDiscovery(r),
-		http.WithBlock(),
 	)
+		fmt.Println("配置连接")
+
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer conn.Close()
 	client := helloworld.NewGreeterHTTPClient(conn)
+	fmt.Println("获取到了 cli")
 	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos"})
+		fmt.Println("请求")
 	if err != nil {
 		log.Fatal(err)
 	}
