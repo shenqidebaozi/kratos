@@ -2,14 +2,13 @@ package main
 
 import (
 	"context"
-	"log"
-	"time"
-
+	"fmt"
 	"github.com/go-kratos/etcd/registry"
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"log"
 )
 
 func main() {
@@ -20,11 +19,9 @@ func main() {
 		panic(err)
 	}
 	r := registry.New(cli)
-	for {
-		callHTTP(r)
-		callGRPC(r)
-		time.Sleep(time.Second)
-	}
+	fmt.Println("获取到了注册中心")
+	callHTTP(r)
+	callGRPC(r)
 }
 
 func callGRPC(r *registry.Registry) {
