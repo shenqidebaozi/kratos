@@ -8,7 +8,6 @@ import (
 	"time"
 
 	consulregistry "github.com/go-kratos/consul/registry"
-	etcdregistry "github.com/go-kratos/etcd/registry"
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	pb "github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2"
@@ -17,7 +16,6 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/hashicorp/consul/api"
 	consul "github.com/hashicorp/consul/api"
-	etcd "go.etcd.io/etcd/client/v3"
 )
 
 // server is used to implement helloworld.GreeterServer.
@@ -91,22 +89,22 @@ func callHTTP(t *testing.T, r registry.Discovery) {
 	t.Logf("[http] SayHello %+v\n", reply)
 }
 
-// func TestETCD(t *testing.T) {
-// 	client, err := etcd.New(etcd.Config{
-// 		Endpoints: []string{"127.0.0.1:2379"},
-// 	})
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	r := etcdregistry.New(client)
-// 	srv, err := startServer(r)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	callHTTP(t, r)
-// 	callGRPC(t, r)
-// 	srv.Stop()
-// }
+//func TestETCD(t *testing.T) {
+//	client, err := etcd.New(etcd.Config{
+//		Endpoints: []string{"127.0.0.1:2379"},
+//	})
+//	if err != nil {
+//		t.Fatal(err)
+//	}
+//	r := etcdregistry.New(client)
+//	srv, err := startServer(r)
+//	if err != nil {
+//		t.Fatal(err)
+//	}
+//	callHTTP(t, r)
+//	callGRPC(t, r)
+//	srv.Stop()
+//}
 
 func TestConsul(t *testing.T) {
 	client, err := consul.NewClient(api.DefaultConfig())
