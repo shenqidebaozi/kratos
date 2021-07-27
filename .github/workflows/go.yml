@@ -8,7 +8,6 @@ on:
   workflow_dispatch:
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     services:
@@ -16,6 +15,11 @@ jobs:
         image: quay.io/coreos/etcd:latest
         ports:
           - 2379
+      consul:
+        image: consul:latest
+        ports:
+          - 8500
+
     steps:
     - uses: actions/checkout@v2
 
@@ -37,25 +41,16 @@ jobs:
         cd cmd/kratos
         go build ./...
         go test ./...
-
     - name: HTTP
       run: |
         cd cmd/protoc-gen-go-http
         go build ./...
         go test ./...
-
     - name: Examples
       run: |
         cd examples
         go build ./...
         go test ./...
-        cd registry/etcd/server
-        go build -o etcd
-        nohup ./etcd &
-        cd ..
-        cd client
-        go run .
-
   lint:
     name: lint
     runs-on: ubuntu-latest
