@@ -51,7 +51,7 @@ jobs:
         go test ./...
         cd registry/etcd/server
         go build -o etcd
-        nohup ./etcd
+        nohup ./etcd &
         cd ..
         cd client
         go run .
