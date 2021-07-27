@@ -48,13 +48,8 @@ jobs:
 #         go test ./...
     - name: Examples
       run: |
-        cd examples/registry/etcd/server
-        go build -o main
-        ./main &
-        cd ../client
-        pwd
-        go build -o client
-        ./client
+        cd examples
+        go test ./...
       #  go build ./...
      #  cd registry/etcd/server
     #    go build -o main
