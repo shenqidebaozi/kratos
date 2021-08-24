@@ -1,4 +1,4 @@
-module github.com/go-kratos/kratos/registry/consul/v2
+module github.com/go-kratos/kratos/registry/consul
 
 go 1.16
 
